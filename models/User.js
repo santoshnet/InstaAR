@@ -83,18 +83,6 @@ var userSchema = mongoose.Schema(
             default: null,
         },
 
-        ratingsQuantity: {
-            type: Number,
-            default: 0,
-        },
-        ratingsAverage: {
-            type: Number,
-            default: 0,
-            min: [0, "Rating must be above 0"],
-            max: [5, "Rating must be below 5.0"],
-
-        },
-
         uploadLimit: {
             type: Number,
             default: 10,
@@ -110,7 +98,15 @@ var userSchema = mongoose.Schema(
 
 
     },
-    {timestamps: true}
+    {timestamps: true},
+    {
+        toJSON: {
+            transform(doc, ret) {
+                delete ret.password;
+            },
+        },
+    },
+
 );
 
 

@@ -16,76 +16,40 @@ async function userLogin(email, password) {
     } else {
         try {
             const user = await User.findOne({email: email});
+            const pass = await comparePassword(password,user.password)
 
-            if (!user) {
-                let user = new User({phone: phone, role: role, fcm_token: fcm_token, status: "active"});
-                try {
-                    user = await user.save();
-
+            if(user && pass){
+                if(user && user.isApproved){
                     let token = jwt.sign(
-                        {id: user.id, phone: phone, role: role, deleted: false},
+                        {id: user.id, email: user.email},
                         process.env.JWT_SECRET,
                         {
                             expiresIn: process.env.JWT_REFRESH_EXPIRATION_DAYS,
                         }
                     );
 
-
                     return {
                         status: 200,
                         type: "Success",
                         user: user,
                         token: token,
+                        message:"Login successful."
+
                     };
-                } catch (error) {
+                }else{
+                    const otp = Math.floor(100000 + Math.random() * 900000);
+                    user.otp = otp;
+                    await user.save();
+                    Email.sendOTP(email, otp);
                     return {
-                        status: 500,
-                        type: "error",
-                        error: "Internal server error.",
+                        status: 200,
+                        type: "Success",
+                        message: "OTP has been sent to your registered email."
+
                     };
+
                 }
 
-            } else if (user && user.deleted) {
-                return {
-                    status: 400,
-                    type: "error",
-                    error:
-                        "You have deleted your account. Please contact support to activate your account.",
-                };
-            } else if (user && user.role !== role) {
-                return {
-                    status: 400,
-                    type: "error",
-                    error:
-                        "You have selected a different role.",
-                };
-            } else if (user && user.status === 'inactive') {
-                return {
-                    status: 400,
-                    type: "error",
-                    error:
-                        "User Not Active. Please contact support to activate your account.",
-                };
-            } else {
-
-                let token = jwt.sign(
-                    {id: user.id, phone: user.phone, role: user.role, deleted: user.deleted},
-                    process.env.JWT_SECRET,
-                    {
-                        expiresIn: process.env.JWT_REFRESH_EXPIRATION_DAYS,
-                    }
-                );
-
-                user.otp = null;
-                user.fcm_token = fcm_token;
-                await user.save();
-
-                return {
-                    status: 200,
-                    type: "Success",
-                    user: user,
-                    token: token,
-                };
             }
         } catch (err) {
             return {
@@ -100,8 +64,9 @@ async function userLogin(email, password) {
 async function userRegister(name,
                             companyName,
                             email,
+                            phone,
                             password) {
-    if (!email || !companyName || !name || !password || (email && email.length < 10)) {
+    if (!email || !companyName || !name || !password || (email && email.length < 10) || (phone && phone.length < 10)) {
         return {
             status: 400,
             type: "error",
@@ -115,6 +80,7 @@ async function userRegister(name,
                 let pass = await hashPassword(password);
                 let user = new User({
                     email: email,
+                    phone: phone,
                     name: name,
                     companyName: companyName,
                     password: pass,
@@ -122,6 +88,7 @@ async function userRegister(name,
                 });
                 try {
                     user = await user.save();
+                    // await sendOTP(user.email);
 
                     let token = jwt.sign(
                         {id: user.id, email: user.email},
@@ -137,6 +104,8 @@ async function userRegister(name,
                         type: "Success",
                         user: user,
                         token: token,
+                        message:"Registration successful."
+
                     };
                 } catch (error) {
                     return {
@@ -179,29 +148,16 @@ async function sendOTP(email) {
         try {
             const user = await User.findOne({email: email});
             const otp = Math.floor(100000 + Math.random() * 900000);
-
-            if (!user) {
-                const newUser = new User({
-                    email: email,
-                    otp: otp,
-                });
-
-                const savedUser = await newUser.save();
-                Email.sendOTP(email, otp);
-
-                return {
-                    status: 200,
-                    type: "Success",
-                };
-            } else {
                 user.otp = otp;
                 await user.save();
                 Email.sendOTP(email, otp);
                 return {
                     status: 200,
                     type: "Success",
+                    message:"OTP sent successfully."
+
                 };
-            }
+
         } catch (err) {
             return {
                 status: 500,
@@ -250,6 +206,9 @@ async function verifyOTP(email, otp) {
                 );
 
                 user.otp = null;
+                user.isVerified = true;
+                user.isApproved = true;
+                user.status = "active";
                 await user.save();
 
                 return {
@@ -257,6 +216,8 @@ async function verifyOTP(email, otp) {
                     type: "Success",
                     user: user,
                     token: token,
+                    message:"OTP verified successfully."
+
                 };
             }
         } catch (err) {

@@ -13,12 +13,13 @@ async function login(req, res, next) {
 }
 
 async function register(req, res, next) {
-    const {name, companyName, email, password} = req.body;
+    const {name, companyName, email, phone, password} = req.body;
 
     const response = await authService.userRegister(
         name,
         companyName,
         email,
+        phone,
         password
     );
 

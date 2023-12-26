@@ -9,7 +9,7 @@ const {
 
 router.post("/login", login);
 router.post("/register", register);
-router.post("/admin/verify", verifyOTP);
+router.post("/verify-otp", verifyOTP);
 router.post("/send-otp", sendOTP);
 
 module.exports = router;
