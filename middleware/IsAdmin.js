@@ -2,7 +2,7 @@ const jwt = require("jsonwebtoken");
 const TypedError = require('../helper/ErrorHandler')
 
 
-const verifyToken = (req, res, next) => {
+const isAdmin = (req, res, next) => {
     const authHeader =
         req.headers["x-access-token"] || req.headers["authorization"];
     if (authHeader) {
@@ -16,15 +16,22 @@ const verifyToken = (req, res, next) => {
             } else {
                 //bind on request
                 req.user = user;
-                next()
+                if(user.role==="admin"){
+                    next()
+                }else {
+                    let err = new TypedError('token', 401, 'invalid_token', {
+                        message: "You dont't have access to this module."
+                    })
+                    return res.status(401).json(err);
+                }
             }
         });
     } else {
         let err = new TypedError('token', 401, 'invalid_token', {
             message: "Token is not Provided"
         })
-        return next(err)
+        return res.status(401).json(err);
     }
 };
 
-module.exports = verifyToken;
+module.exports = isAdmin;

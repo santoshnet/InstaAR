@@ -1,5 +1,6 @@
 const router = require("express").Router();
 const verifyToken = require("../../middleware/VerifyToken");
+const isAdmin = require("../../middleware/IsAdmin");
 
 const {
     settingData,
@@ -10,7 +11,7 @@ const {upload} = require("../../helper/fileHelper");
 router.get("/", settingData);
 
 router.post(
-    "/", verifyToken,
+    "/", isAdmin,
     upload.fields([
         {
             name: "logo",

@@ -21,7 +21,7 @@ async function userLogin(email, password) {
             if(user && pass){
                 if(user && user.isApproved){
                     let token = jwt.sign(
-                        {id: user.id, email: user.email},
+                        {id: user.id, email: user.email,role:user.role},
                         process.env.JWT_SECRET,
                         {
                             expiresIn: process.env.JWT_REFRESH_EXPIRATION_DAYS,
@@ -198,7 +198,7 @@ async function verifyOTP(email, otp) {
                 };
             } else {
                 let token = jwt.sign(
-                    {id: user.id, phone: user.email,},
+                    {id: user.id, email: user.email, role:user.role},
                     process.env.JWT_SECRET,
                     {
                         expiresIn: process.env.JWT_REFRESH_EXPIRATION_DAYS,

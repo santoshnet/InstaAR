@@ -6,9 +6,9 @@ async function settingData(req, res, next) {
 }
 
 async function createSetting(req, res, next) {
-    const logo = req.files.logo ? req.files.logo[0] : null;
-    const favicon = req.files.favIcon ? req.files.favIcon[0] : null;
-    const banner = req.files.banner ? req.files.banner[0] : null;
+    const logo = req?.files?.logo ? req.files.logo[0] : null;
+    const favicon = req?.files?.favIcon ? req.files.favIcon[0] : null;
+    const banner = req?.files?.banner ? req.files.banner[0] : null;
     let {
         body
     } = req;

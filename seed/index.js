@@ -1,49 +1,47 @@
-var Admin = require("../models/Admin");
+var User = require("../models/User");
 var dotenv = require("dotenv");
 
 var mongoose = require("mongoose");
 const Setting = require("../models/Setting");
-const ShippingCharge = require("../models/ShippingCharge");
-dotenv.config();
 
-mongoose.connect(process.env.DATABASE_DEV_CONNECTION, function (error) {
-  if (error) throw error;
-  console.log(`connect mongodb success`);
+dotenv.config();
+let DATABASE_CONNECTION = process.env.DATABASE_PROD_CONNECTION;
+if (process.env.NODE_ENV === "development") {
+  DATABASE_CONNECTION = process.env.DATABASE_DEV_CONNECTION;
+}
+
+mongoose.connect(DATABASE_CONNECTION).then((res) => {
+  console.log("Database connected");
+}).catch(error => {
+  console.log(error);
 });
 
-var newAdmin = new Admin({
-  email: "artistokart@yopmail.com",
+var newAdmin = new User({
+  email: "admin@admin.com",
   password: "password",
   name: "Admin",
   role: "admin",
   phone: "9876543210",
 });
 
-Admin.createUser(newAdmin, function (err, user) {
+User.createUser(newAdmin, function (err, user) {
   if (err) throw err;
   console.log(user);
 });
 
 
-var newSetting = new Setting({
-  email: "artistokart@yopmail.com",
-  title: "Artistokart",
-  phone: "9876543210",
-  currency: "₹",
-});
-
-Setting.createSetting(newSetting, function (err, user) {
-  if (err) throw err;
-  console.log(user);
-});
-
-var newShippingCharge1 = new ShippingCharge({
-  "title": "Free Shipping",
-  "deliverable": "4-5 days",
-  "minimum_order_amount": 1000,
-  "price": 0,
-  "status": "active",
-});
+// var newSetting = new Setting({
+//   email: "artistokart@yopmail.com",
+//   title: "Artistokart",
+//   phone: "9876543210",
+//   currency: "₹",
+// });
+//
+// Setting.createSetting(newSetting, function (err, user) {
+//   if (err) throw err;
+//   console.log(user);
+// });
+//
 
 
 
