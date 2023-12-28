@@ -1,8 +1,11 @@
 const router = require("express").Router();
-const {userData, userUpdate, addUser, deleteUser, topSellers, staffs, sendUserQueryEmail, profileUpdate,walletAddressUpdate, removeUser } = require("../controller/user.controller");
-const {upload} = require('../helper/fileHelper');
+const verifyToken = require("../../middleware/VerifyToken");
+const isAdmin = require("../../middleware/IsAdmin");
 
-router.post("/create", upload.fields([
+const {userData, userUpdate, addUser, deleteUser, users } = require("../../controller/user.controller");
+const {upload} = require('../../helper/fileHelper');
+
+router.post("/create",isAdmin, upload.fields([
     {
         name: "profileImage",
         maxCount: 1,
@@ -11,12 +14,11 @@ router.post("/create", upload.fields([
         name: "banner",
         maxCount: 1,
     }
-]), addUser);
-router.get("/details", userData);
-router.get("/admin/staffs", staffs);
-router.delete("/:id", deleteUser);
-router.get("/top/sellers", topSellers);
-router.patch("/:id", upload.fields([
+]),  addUser);
+router.get("/details", verifyToken, userData);
+router.get("/", isAdmin, users);
+router.delete("/:id",isAdmin, deleteUser);
+router.patch("/:id",verifyToken, upload.fields([
     {
         name: "profileImage",
         maxCount: 1,
@@ -26,10 +28,6 @@ router.patch("/:id", upload.fields([
         maxCount: 1,
     }
 ]), userUpdate);
-router.patch("/profile/update", profileUpdate);
-router.post("/email/send", sendUserQueryEmail);
-router.patch("/wallet-address/update", walletAddressUpdate);
-router.get("/delete", removeUser);
 
 
 module.exports = router;

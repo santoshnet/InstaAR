@@ -86,14 +86,6 @@ var userSchema = mongoose.Schema(
         uploadLimit: {
             type: Number,
             default: 10,
-        },
-        totalView: {
-            type: Number,
-            default: 0,
-        },
-        walletAddress: {
-            type: String,
-            default: null,
         }
 
 
