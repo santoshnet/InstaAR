@@ -42,7 +42,7 @@ var bannerSchema = mongoose.Schema(
         status: {
             type: String,
             enum: ["active", "inactive"],
-            default: "inactive",
+            default: "active",
         }
     },
     {timestamps: true}

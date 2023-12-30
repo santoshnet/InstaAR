@@ -33,4 +33,4 @@ var featureSchema = mongoose.Schema(
 );
 
 
-var Product = (module.exports = mongoose.model("Feature", featureSchema));
+var Feature = (module.exports = mongoose.model("Feature", featureSchema));
