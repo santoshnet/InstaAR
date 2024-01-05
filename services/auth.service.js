@@ -16,41 +16,49 @@ async function userLogin(email, password) {
     } else {
         try {
             const user = await User.findOne({email: email});
-            const pass = await comparePassword(password,user.password)
+           if(user) {
+               const pass = await comparePassword(password,user.password)
+               if (user && pass) {
+                   if (user && user.isApproved) {
+                       let token = jwt.sign(
+                           {id: user.id, email: user.email, role: user.role},
+                           process.env.JWT_SECRET,
+                           {
+                               expiresIn: process.env.JWT_REFRESH_EXPIRATION_DAYS,
+                           }
+                       );
 
-            if(user && pass){
-                if(user && user.isApproved){
-                    let token = jwt.sign(
-                        {id: user.id, email: user.email,role:user.role},
-                        process.env.JWT_SECRET,
-                        {
-                            expiresIn: process.env.JWT_REFRESH_EXPIRATION_DAYS,
-                        }
-                    );
+                       return {
+                           status: 200,
+                           type: "Success",
+                           user: user,
+                           token: token,
+                           message: "Login successful."
 
-                    return {
-                        status: 200,
-                        type: "Success",
-                        user: user,
-                        token: token,
-                        message:"Login successful."
+                       };
+                   } else {
+                       const otp = Math.floor(100000 + Math.random() * 900000);
+                       user.otp = otp;
+                       await user.save();
+                       Email.sendOTP(email, otp);
+                       return {
+                           status: 200,
+                           type: "Success",
+                           message: "OTP has been sent to your registered email."
 
-                    };
-                }else{
-                    const otp = Math.floor(100000 + Math.random() * 900000);
-                    user.otp = otp;
-                    await user.save();
-                    Email.sendOTP(email, otp);
-                    return {
-                        status: 200,
-                        type: "Success",
-                        message: "OTP has been sent to your registered email."
+                       };
 
-                    };
+                   }
 
-                }
+               }
+           }else{
+               return {
+                   status: 400,
+                   type: "error",
+                   message: "Please provide registered email and password.",
+               };
+           }
 
-            }
         } catch (err) {
             return {
                 status: 500,
@@ -77,18 +85,20 @@ async function userRegister(name,
             const user = await User.findOne({email: email});
 
             if (!user) {
+                const otp = Math.floor(100000 + Math.random() * 900000);
                 let pass = await hashPassword(password);
                 let user = new User({
                     email: email,
                     phone: phone,
                     name: name,
                     companyName: companyName,
+                    otp:otp,
                     password: pass,
                     status: "active"
                 });
                 try {
                     user = await user.save();
-                    // await sendOTP(user.email);
+                     await sendOTP(user.email);
 
                     let token = jwt.sign(
                         {id: user.id, email: user.email},
@@ -102,9 +112,8 @@ async function userRegister(name,
                     return {
                         status: 200,
                         type: "Success",
-                        user: user,
                         token: token,
-                        message:"Registration successful."
+                        message:"Registration successful. Please verify your email."
 
                     };
                 } catch (error) {

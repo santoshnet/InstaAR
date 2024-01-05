@@ -5,9 +5,9 @@ const isAdmin = require("../../middleware/IsAdmin");
 const {products, updateProduct, addProduct, deleteProduct,productData } = require("../../controller/product.controller");
 const {features } = require("../../controller/feature.controller");
 
-const {upload} = require('../../helper/fileHelper');
+const {productUpload} = require('../../helper/fileHelper');
 
-router.post("/create", upload.fields([
+router.post("/create", productUpload.fields([
     {
         name: "image",
         maxCount: 1,
@@ -21,7 +21,7 @@ router.get("/:id", productData);
 router.get("/:id/features", features);
 router.get("/", products);
 router.delete("/:id", deleteProduct);
-router.patch("/:id", upload.fields([
+router.patch("/:id", productUpload.fields([
     {
         name: "image",
         maxCount: 1,

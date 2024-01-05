@@ -4,9 +4,9 @@ const isAdmin = require("../../middleware/IsAdmin");
 
 const { updateFeature, addFeature, deleteFeature,featureData } = require("../../controller/feature.controller");
 
-const {upload} = require('../../helper/fileHelper');
+const {featureUpload} = require('../../helper/fileHelper');
 
-router.post("/create", upload.fields([
+router.post("/create", featureUpload.fields([
     {
         name: "image",
         maxCount: 1,
@@ -18,7 +18,7 @@ router.post("/create", upload.fields([
 ]),  addFeature);
 router.get("/:id", featureData);
 router.delete("/:id", deleteFeature);
-router.patch("/:id", upload.fields([
+router.patch("/:id", featureUpload.fields([
     {
         name: "image",
         maxCount: 1,

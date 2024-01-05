@@ -17,7 +17,8 @@ async function addProduct(req, res, next) {
     const {body} = req;
     const image = req.files.image ? req.files.image[0] : null;
     const file = req.files.file ? req.files.file[0] : null;
-    const response = await productService.addProduct(body, image, file);
+    const user = req.user;
+    const response = await productService.addProduct(body, image, file,user);
     return res.status(response.status).json(response);
 }
 

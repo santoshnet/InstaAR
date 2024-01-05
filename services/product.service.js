@@ -29,7 +29,7 @@ async function products(params, user) {
                 .skip(startIndex)
                 .exec();
         } else {
-            products = await Product.find({id: user.id})
+            products = await Product.find({user:user.id})
                 .limit(limit)
                 .skip(startIndex)
                 .exec();
@@ -39,7 +39,7 @@ async function products(params, user) {
         return {
             status: 200,
             type: "success",
-            product: products,
+            products: products,
         };
     } catch (e) {
         return {
@@ -95,7 +95,7 @@ async function updateProduct(body, image, file, id) {
 }
 
 
-async function addProduct(body, image, file) {
+async function addProduct(body, image, file,user) {
     let requiredFields = [];
     if (!body.title) {
         requiredFields.push({name: "title field required"});
@@ -125,7 +125,7 @@ async function addProduct(body, image, file) {
         let fileData = file.destination.replace("public/", "") + file.filename;
         body["file"] = fileData;
     }
-
+   body['user']=user.id;
 
     let product = new Product(body);
     try {
